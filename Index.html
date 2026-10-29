@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080d19">
+<title>ARENA LIVE</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080d19;color:#f5f7ff;font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;padding-bottom:85px}
+header{padding:24px 18px 18px;background:linear-gradient(135deg,#121f39,#080d19)}
+.logo{font-size:25px;font-weight:900;letter-spacing:1px}
+.logo span{color:#35e0a1}
+.sub{color:#9eabc4;font-size:13px;margin-top:7px}
+.search{width:100%;padding:14px;border-radius:13px;border:1px solid #283650;background:#111a2c;color:white;margin-top:20px;font-size:16px}
+h2{font-size:19px;margin:24px 18px 12px}
+.filters{display:flex;gap:8px;padding:0 18px;overflow:auto}
+.chip{white-space:nowrap;border:1px solid #2c3850;border-radius:20px;padding:10px 14px;background:#111a2c;color:#cbd5e8}
+.chip.active{background:#35e0a1;color:#07120e;border-color:#35e0a1;font-weight:bold}
+.notice{margin:16px 18px;padding:12px;border-radius:12px;background:#121d2e;color:#b5c5df;font-size:12px;line-height:1.5}
+.grid{padding:0 18px;display:grid;gap:13px}
+.card{background:#111a2c;border:1px solid #24314a;border-radius:16px;padding:16px}
+.top{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#a8b7d0}
+.live{color:#ff737d;font-weight:800}
+.sport{color:#35e0a1}
+.teams{font-size:17px;font-weight:800;margin:19px 0 10px}
+.meta{color:#9eabc4;font-size:12px}
+.actions{display:flex;gap:9px;margin-top:16px}
+button{font:inherit;cursor:pointer}
+.watch{flex:1;background:#35e0a1;color:#06120d;border:0;border-radius:10px;padding:12px;font-weight:800}
+.fav{border:1px solid #33415a;background:#172238;color:white;border-radius:10px;padding:10px 14px}
+.empty{text-align:center;color:#9eabc4;padding:40px 10px}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:space-around;padding:12px 4px calc(12px + env(safe-area-inset-bottom));background:#0d1525;border-top:1px solid #253149}
+nav button{background:none;border:0;color:#aab8d0;font-size:12px;padding:5px}
+nav button.active{color:#35e0a1}
+.modal{display:none;position:fixed;inset:0;background:#080d19;z-index:5;padding:24px;overflow:auto}
+.modal.open{display:block}
+.close{float:right;background:#202c42;color:white;border:0;border-radius:10px;padding:10px}
+.player{margin-top:60px;aspect-ratio:16/9;background:#131e32;border-radius:16px;display:grid;place-items:center;text-align:center;padding:20px;color:#b9c8df}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">ARENA <span>LIVE</span></div>
+<div class="sub">Le sport, en un seul endroit.</div>
+<input id="search" class="search" placeholder="Rechercher un match, une équipe…" />
+</header>
+<h2>Sports</h2>
+<div class="filters" id="filters">
+<button class="chip active" data-sport="Tous">Tout</button>
+<button class="chip" data-sport="Football">⚽ Football</button>
+<button class="chip" data-sport="Basket">🏀 Basket</button>
+<button class="chip" data-sport="Tennis">🎾 Tennis</button>
+<button class="chip" data-sport="Rugby">🏉 Rugby</button>
+</div>
+<h2 id="heading">À suivre</h2>
+<div class="filters" id="tabs">
+<button class="chip active" data-tab="Tous">Tous</button>
+<button class="chip" data-tab="En direct">En direct</button>
+<button class="chip" data-tab="À venir">À venir</button>
+<button class="chip" data-tab="Favoris">Favoris ♥</button>
+</div>
+<div class="notice">ℹ️ Les rencontres ci-dessous sont des exemples fictifs. Pour regarder un match, utilisez une source de diffusion officielle et autorisée.</div>
+<main class="grid" id="matches"></main>
+<nav>
+<button class="active" data-nav="Accueil">⌂<br>Accueil</button>
+<button data-nav="Direct">●<br>Direct</button>
+<button data-nav="Favoris">♡<br>Favoris</button>
+<button data-nav="Sports">▦<br>Sports</button>
+</nav>
+<div class="modal" id="modal">
+<button class="close" id="close">Fermer ✕</button>
+<div class="player"><div><div style="font-size:36px">▶</div><p>Diffusion officielle</p><small>Ajoutez une source autorisée pour regarder cette rencontre.</small></div></div>
+<h2 id="detailTitle" style="margin-left:0"></h2>
+<p class="meta">ARENA LIVE · Informations du match</p>
+</div>
+<script>
+const games=[
+{id:1,sport:"Football",a:"Paris FC",b:"Lyon",status:"En direct",time:"68′",league:"Ligue 1 · Exemple"},
+{id:2,sport:"Football",a:"Londres FC",b:"Madrid CF",status:"À venir",time:"20:45",league:"Coupe européenne · Exemple"},
+{id:3,sport:"Basket",a:"Paris Hoops",b:"Lyon Basket",status:"En direct",time:"Q3 · 05:32",league:"Basket · Exemple"},
+{id:4,sport:"Tennis",a:"Joueur A",b:"Joueur B",status:"À venir",time:"21:00",league:"Tournoi · Exemple"},
+{id:5,sport:"Rugby",a:"Toulouse",b:"Bordeaux",status:"À venir",time:"Samedi · 17:00",league:"Rugby · Exemple"},
+{id:6,sport:"Football",a:"Marseille",b:"Lille",status:"À venir",time:"Dimanche · 21:00",league:"Ligue 1 · Exemple"}
+];
+let sport="Tous",tab="Tous",query="",favorites=[];
+const root=document.getElementById("matches");
+function render(){
+let list=games.filter(g=>(sport==="Tous"||g.sport===sport)&&(tab==="Tous"||(tab==="Favoris"?favorites.includes(g.id):g.status===tab))&&(g.a+" "+g.b+" "+g.sport+" "+g.league).toLowerCase().includes(query.toLowerCase()));
+root.innerHTML=list.length?list.map(g=>`<article class="card"><div class="top"><span class="sport">${g.sport.toUpperCase()}</span><span class="${g.status==="En direct"?"live":""}">${g.status==="En direct"?"● EN DIRECT":g.time}</span></div><div class="teams">${g.a} <span style="color:#7e8da8">vs</span> ${g.b}</div><div class="meta">${g.league}</div><div class="actions"><button class="watch" onclick="openGame(${g.id})">Voir le match →</button><button class="fav" onclick="toggleFav(${g.id})">${favorites.includes(g.id)?"♥":"♡"}</button></div></article>`).join(""):'<div class="empty">Aucun match trouvé.</div>';
+}
+function openGame(id){let g=games.find(x=>x.id===id);document.getElementById("detailTitle").textContent=g.a+" vs "+g.b;document.getElementById("modal").classList.add("open")}
+function toggleFav(id){favorites=favorites.includes(id)?favorites.filter(x=>x!==id):[...favorites,id];render()}
+document.getElementById("close").onclick=()=>document.getElementById("modal").classList.remove("open");
+document.getElementById("search").oninput=e=>{query=e.target.value;render()};
+document.querySelectorAll("[data-sport]").forEach(b=>b.onclick=()=>{sport=b.dataset.sport;document.querySelectorAll("[data-sport]").forEach(x=>x.classList.toggle("active",x===b));render()});
+document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;document.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x===b));render()});
+document.querySelectorAll("[data-nav]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-nav]").forEach(x=>x.classList.toggle("active",x===b));if(b.dataset.nav==="Direct")tab="En direct";else if(b.dataset.nav==="Favoris")tab="Favoris";else tab="Tous";document.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x.dataset.tab===tab));if(b.dataset.nav==="Sports"){sport="Tous";document.querySelectorAll("[data-sport]").forEach(x=>x.classList.toggle("active",x.dataset.sport===sport))}render();window.scrollTo(0,0)});
+render();
+</script>
+</body>
+</html>
